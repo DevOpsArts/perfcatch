@@ -372,17 +372,247 @@
         }
 
         /* Architecture */
-        .arch-diagram {
+        /* Architecture Diagram */
+        .arch-container {
+            position: relative;
+            padding: 2rem;
+        }
+
+        .arch-node-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 3rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            line-height: 1.6;
-            overflow-x: auto;
-            white-space: pre;
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .arch-node-box::before {
+            content: 'Kubernetes Node';
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: var(--bg-dark);
+            padding: 0 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-muted);
+        }
+
+        .arch-inner {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .arch-pod-box {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .arch-pod-box h4 {
+            font-size: 0.9rem;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+        }
+
+        .arch-pod-box .arch-arrow-out {
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .arch-pod-box .arch-arrow-out::after {
+            content: '▶';
+            position: absolute;
+            right: -4px;
+            top: -8px;
+            color: var(--primary);
+            font-size: 0.7rem;
+        }
+
+        .arch-request-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary-light);
+        }
+
+        .arch-agent-box {
+            background: rgba(6, 182, 212, 0.05);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .arch-agent-box h4 {
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .arch-agent-box h4 span {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(6, 182, 212, 0.15);
+            border-radius: 4px;
+            font-weight: 400;
+        }
+
+        .arch-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .arch-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .arch-section-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .arch-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .arch-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.35rem 0.7rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .arch-item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-blue { background: #6366f1; }
+        .dot-green { background: #10b981; }
+        .dot-cyan { background: #06b6d4; }
+        .dot-yellow { background: #f59e0b; }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .arch-flow-arrow {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        .arch-flow-item {
+            padding: 0.4rem 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .arch-endpoints {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .arch-endpoint {
+            padding: 0.4rem 0.8rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--success);
+        }
+
+        /* External services below the node */
+        .arch-externals {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px dashed var(--border);
+        }
+
+        .arch-external {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .arch-external::before {
+            content: '↓';
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        .arch-external h5 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .arch-external p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .arch-external.prom { border-color: rgba(245, 158, 11, 0.4); }
+        .arch-external.prom h5 { color: var(--warning); }
+        .arch-external.remote { border-color: rgba(6, 182, 212, 0.4); }
+        .arch-external.remote h5 { color: var(--accent); }
+        .arch-external.grafana { border-color: rgba(99, 102, 241, 0.4); }
+        .arch-external.grafana h5 { color: var(--primary-light); }
+
+        @media (max-width: 768px) {
+            .arch-inner { grid-template-columns: 1fr; }
+            .arch-externals { grid-template-columns: 1fr; }
+            .arch-pod-box .arch-arrow-out { display: none; }
         }
 
         /* Metrics Table */
@@ -674,40 +904,66 @@ STATUS: deployed</span>
             <h2>How It Works</h2>
             <p>eBPF programs in kernel space, zero-copy event processing in userspace</p>
         </div>
-        <div class="arch-diagram">
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  Kubernetes Node                                                             │
-│                                                                              │
-│  ┌──────────────────┐       ┌──────────────────────────────────────────────┐│
-│  │ Your App Pods    │       │ perfcatch-agent (DaemonSet)                  ││
-│  │                  │       │                                                ││
-│  │  HTTP request ──────────►│  eBPF (kernel space)                         ││
-│  │                  │       │    request_tracker.c (accept→send→close)     ││
-│  │                  │       │    dependency_tracker.c (outbound calls)      ││
-│  │                  │       │    resource_tracker.c (CPU via sched_switch)  ││
-│  │                  │       │                                                ││
-│  └──────────────────┘       │  Userspace                                   ││
-│                             │    Collector → Correlator                      ││
-│                             │         ↓                                      ││
-│                             │    Ring Buffer (in-memory, 50K entries)        ││
-│                             │         ↓                                      ││
-│                             │    API Server (:9090)                          ││
-│                             │      /metrics (histograms + gauges)            ││
-│                             │      /api/requests (JSON query)                ││
-│                             └──────────┬────────────┬──────────────────────┘│
-└────────────────────────────────────────┼────────────┼────────────────────────┘
-                                         │            │
-                          ┌──────────────▼──┐    ┌───▼──────────────────────┐
-                          │  Prometheus      │    │  Remote Write            │
-                          │  (scrape /metrics│    │  (VictoriaMetrics/       │
-                          │   every 15s)     │    │   Mimir/Thanos)          │
-                          └────────┬─────────┘    └────────────────────────┘
-                                   │
-                          ┌────────▼─────────┐
-                          │  Grafana          │
-                          │  (pre-built       │
-                          │   dashboard)      │
-                          └──────────────────┘
+        <div class="arch-container">
+            <div class="arch-node-box">
+                <div class="arch-inner">
+                    <!-- Left: App Pods -->
+                    <div class="arch-pod-box">
+                        <h4>Your App Pods</h4>
+                        <div class="arch-request-label">⚡ HTTP request</div>
+                        <div class="arch-arrow-out"></div>
+                    </div>
+
+                    <!-- Right: PerfCatch Agent -->
+                    <div class="arch-agent-box">
+                        <h4>perfcatch-agent <span>DaemonSet</span></h4>
+
+                        <div class="arch-section">
+                            <div class="arch-section-label">eBPF — Kernel Space</div>
+                            <div class="arch-items">
+                                <div class="arch-item"><span class="dot dot-red"></span>request_tracker.c</div>
+                                <div class="arch-item"><span class="dot dot-blue"></span>dependency_tracker.c</div>
+                                <div class="arch-item"><span class="dot dot-green"></span>resource_tracker.c</div>
+                            </div>
+                        </div>
+
+                        <div class="arch-section">
+                            <div class="arch-section-label">Userspace Pipeline</div>
+                            <div class="arch-flow">
+                                <div class="arch-flow-item">Collector</div>
+                                <span class="arch-flow-arrow">→</span>
+                                <div class="arch-flow-item">Correlator</div>
+                                <span class="arch-flow-arrow">→</span>
+                                <div class="arch-flow-item">Ring Buffer (50K)</div>
+                            </div>
+                        </div>
+
+                        <div class="arch-section">
+                            <div class="arch-section-label">API Server :9090</div>
+                            <div class="arch-endpoints">
+                                <div class="arch-endpoint">/metrics</div>
+                                <div class="arch-endpoint">/api/requests</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- External Services -->
+                <div class="arch-externals">
+                    <div class="arch-external prom">
+                        <h5>Prometheus</h5>
+                        <p>Scrape /metrics every 15s<br>5Gi PVC • 15d retention</p>
+                    </div>
+                    <div class="arch-external remote">
+                        <h5>Remote Write</h5>
+                        <p>VictoriaMetrics / Mimir / Thanos<br>Long-term per-request storage</p>
+                    </div>
+                    <div class="arch-external grafana">
+                        <h5>Grafana</h5>
+                        <p>Pre-built 8-panel dashboard<br>Real-time request table</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
