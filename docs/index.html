@@ -737,6 +737,59 @@
         .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--success); }
         .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
 
+        /* Dashboard Screenshots */
+        .screenshots-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .screenshot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        .screenshot-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-caption {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .screenshot-caption h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .screenshot-caption p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .screenshot-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .screenshot-row { grid-template-columns: 1fr; }
+        }
+
         /* Quick Start Steps */
         .steps-container {
             max-width: 800px;
@@ -854,6 +907,7 @@
         <a href="#" class="nav-brand" style="text-decoration:none;">⚡ PerfCatch</a>
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
+            <li><a href="#dashboard">Dashboard</a></li>
             <li><a href="#architecture">Architecture</a></li>
             <li><a href="#metrics">Metrics</a></li>
             <li><a href="#deployment">Deployment</a></li>
@@ -947,6 +1001,41 @@
                 <div class="feature-icon">🌐</div>
                 <h3>Dependency Tracking</h3>
                 <p>Captures outbound TCP connections made during request processing. Maps destination IPs to K8s service names.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview -->
+    <section id="dashboard">
+        <div class="section-header">
+            <h2>Dashboard Preview</h2>
+            <p>Real-time Grafana dashboard with per-request visibility</p>
+        </div>
+        <div class="screenshots-grid">
+            <!-- Main Dashboard -->
+            <div class="screenshot-card">
+                <img src="screenshots/grafana-dashboard.png" alt="PerfCatch Grafana Dashboard - Request Count, Duration, CPU Time, Memory RSS, Network RX/TX panels">
+                <div class="screenshot-caption">
+                    <h4>Grafana Dashboard — Time-Series Panels</h4>
+                    <p>6 panels showing Request Count by Service, Request Duration (ms), CPU Time (ms), Memory RSS (bytes), Network RX and TX bytes — all with per-pod granularity and correlation ID filtering.</p>
+                </div>
+            </div>
+            <!-- Request Table -->
+            <div class="screenshot-row">
+                <div class="screenshot-card">
+                    <img src="screenshots/request-table-left.png" alt="Individual Requests table showing Request ID, Correlation ID, timestamps, method, path, namespace, pod">
+                    <div class="screenshot-caption">
+                        <h4>Per-Request Detail Table</h4>
+                        <p>Every individual request with Request ID, Correlation ID, Start/End Time, HTTP Method, Path, Namespace, Pod, and Process info.</p>
+                    </div>
+                </div>
+                <div class="screenshot-card">
+                    <img src="screenshots/request-table-right.png" alt="Individual Requests table showing Duration, CPU Time, CPU %, Memory, RX/TX Bytes">
+                    <div class="screenshot-caption">
+                        <h4>Resource Metrics per Request</h4>
+                        <p>Duration (ms), CPU Time (ms), CPU % utilization, Memory (bytes), Network RX and TX bytes — color-coded for quick anomaly detection.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
