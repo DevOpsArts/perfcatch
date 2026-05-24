@@ -737,6 +737,86 @@
         .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--success); }
         .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
 
+        /* Quick Start Steps */
+        .steps-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .step-card {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        .step-card:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .step-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .step-content > p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .step-terminal {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+        }
+
+        .step-terminal code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            line-height: 1.7;
+        }
+
+        .step-output {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+
         /* Footer */
         footer {
             padding: 4rem 2rem;
@@ -1095,33 +1175,64 @@ STATUS: deployed</span>
             <h2>Quick Start</h2>
             <p>Up and running in under 2 minutes</p>
         </div>
-        <div class="terminal-preview" style="max-width:900px; margin:0 auto;">
-            <div class="terminal-header">
-                <div class="terminal-dot red"></div>
-                <div class="terminal-dot yellow"></div>
-                <div class="terminal-dot green"></div>
+        <div class="steps-container">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Deploy with Helm</h3>
+                    <p>Install PerfCatch with the bundled monitoring stack</p>
+                    <div class="step-terminal">
+                        <code>helm install perfcatch charts/perfcatch \<br>  -n perfcatch --create-namespace \<br>  --set config.namespace=my-app</code>
+                    </div>
+                </div>
             </div>
-            <div class="terminal-body">
-<span class="cmd"># Deploy perfcatch with monitoring stack</span>
-<span class="cmd">$ helm install perfcatch charts/perfcatch -n perfcatch --create-namespace \</span>
-<span class="cmd">    --set config.namespace=my-app</span>
-
-<span class="cmd"># Verify agent is running</span>
-<span class="cmd">$ kubectl -n perfcatch get pods</span>
-<span class="output">NAME              READY   STATUS    RESTARTS   AGE
-perfcatch-znplr   1/1     Running   0          30s</span>
-
-<span class="cmd"># Send requests with correlation IDs</span>
-<span class="cmd">$ curl -H "X-Correlation-ID: order-12345" http://my-app/compute</span>
-
-<span class="cmd"># Access Grafana dashboard</span>
-<span class="cmd">$ kubectl -n monitoring port-forward svc/grafana 3000:3000</span>
-<span class="output">→ Open http://localhost:3000 (admin / perfcatch)</span>
-<span class="output">→ Dashboard: "PerfCatch - eBPF Request Metrics"</span>
-
-<span class="cmd"># Query the API directly</span>
-<span class="cmd">$ curl localhost:9090/api/requests?correlation_id=order-12345</span>
-<span class="output">{"count": 1, "requests": [{"duration_ms": 9.24, "cpu_time_ms": 8.90, ...}]}</span>
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Verify Agent is Running</h3>
+                    <p>Check the DaemonSet pod is healthy on your node</p>
+                    <div class="step-terminal">
+                        <code>kubectl -n perfcatch get pods</code>
+                        <div class="step-output">NAME              READY   STATUS    RESTARTS   AGE<br>perfcatch-znplr   1/1     Running   0          30s</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Send Requests with Correlation IDs</h3>
+                    <p>Add any supported header — it's auto-captured by eBPF</p>
+                    <div class="step-terminal">
+                        <code>curl -H "X-Correlation-ID: order-12345" \<br>  http://my-app/compute</code>
+                    </div>
+                </div>
+            </div>
+            <!-- Step 4 -->
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>View in Grafana</h3>
+                    <p>Pre-built dashboard with 8 panels — request table, time-series, and filters</p>
+                    <div class="step-terminal">
+                        <code>kubectl -n monitoring port-forward svc/grafana 3000:3000</code>
+                        <div class="step-output">→ Open http://localhost:3000<br>→ Login: admin / perfcatch<br>→ Dashboard: "PerfCatch - eBPF Request Metrics"</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Step 5 -->
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Query the API</h3>
+                    <p>Get per-request data as JSON — filter by correlation ID, namespace, or pod</p>
+                    <div class="step-terminal">
+                        <code>curl localhost:9090/api/requests?correlation_id=order-12345</code>
+                        <div class="step-output">{"count": 1, "requests": [{"duration_ms": 9.24,<br> "cpu_time_ms": 8.90, "memory_rss_bytes": 53518336, ...}]}</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
