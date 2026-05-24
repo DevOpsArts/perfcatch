@@ -25,39 +25,39 @@ PerfCatch measures CPU time, memory, network I/O, and duration for **every indiv
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  Kubernetes Node                                                         │
-│                                                                          │
-│  ┌──────────────────┐       ┌──────────────────────────────────────────┐│
-│  │ Your App Pods    │       │ perfcatch-agent (DaemonSet)              ││
-│  │                  │       │                                            ││
-│  │  HTTP request ──────────►│  eBPF (kernel space)                     ││
-│  │                  │       │    request_tracker.c (accept→send→close) ││
-│  │                  │       │    dependency_tracker.c (outbound calls)  ││
-│  │                  │       │    resource_tracker.c (CPU via sched)     ││
-│  │                  │       │                                            ││
-│  └──────────────────┘       │  Userspace                               ││
-│                             │    Collector → Correlator                  ││
-│                             │         ↓                                  ││
-│                             │    Ring Buffer (in-memory, 50K entries)    ││
-│                             │         ↓                                  ││
-│                             │    API Server (:9090)                      ││
-│                             │      /metrics (histograms + gauges)        ││
-│                             │      /api/requests (JSON query)            ││
-│                             └──────────┬────────────┬──────────────────┘│
-└────────────────────────────────────────┼────────────┼────────────────────┘
-                                         │            │
-                          ┌──────────────▼──┐    ┌───▼──────────────────┐
-                          │  Prometheus      │    │  Remote Write        │
-                          │  (scrape /metrics│    │  (VictoriaMetrics/   │
-                          │   every 15s)     │    │   Mimir/Thanos)      │
-                          └────────┬─────────┘    └────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Kubernetes Node                                                           │
+│                                                                            │
+│  ┌───────────────────┐      ┌────────────────────────────────────────────┐ │
+│  │  Your App Pods    │      │  perfcatch-agent (DaemonSet)               │ │
+│  │                   │      │                                            │ │
+│  │  HTTP request ────┼─────►│  eBPF (kernel space)                       │ │
+│  │                   │      │    request_tracker.c  (accept→send→close)  │ │
+│  │                   │      │    dependency_tracker.c (outbound calls)   │ │
+│  │                   │      │    resource_tracker.c  (CPU via sched)     │ │
+│  │                   │      │                                            │ │
+│  └───────────────────┘      │  Userspace                                 │ │
+│                             │    Collector → Correlator                   │ │
+│                             │         ↓                                   │ │
+│                             │    Ring Buffer (in-memory, 50K entries)     │ │
+│                             │         ↓                                   │ │
+│                             │    API Server (:9090)                       │ │
+│                             │      /metrics (histograms + gauges)         │ │
+│                             │      /api/requests (JSON query)             │ │
+│                             └──────────┬───────────────┬─────────────────┘ │
+└────────────────────────────────────────┼───────────────┼───────────────────┘
+                                         │               │
+                          ┌──────────────▼───┐    ┌──────▼─────────────────┐
+                          │  Prometheus       │    │  Remote Write          │
+                          │  (scrape /metrics │    │  (VictoriaMetrics/     │
+                          │   every 15s)      │    │   Mimir/Thanos)        │
+                          └────────┬──────────┘    └───────────────────────┘
                                    │
-                          ┌────────▼─────────┐
-                          │  Grafana          │
-                          │  (pre-built       │
-                          │   dashboard)      │
-                          └──────────────────┘
+                          ┌────────▼──────────┐
+                          │  Grafana           │
+                          │  (pre-built        │
+                          │   dashboard)       │
+                          └────────────────────┘
 ```
 
 ---
