@@ -865,7 +865,7 @@
     <!-- Hero -->
     <section class="hero">
         <div class="hero-badge">Open Source • eBPF-powered • Zero Code Changes</div>
-        <h1>Per-Request Performance<br><span>Monitoring for K8s</span></h1>
+        <h1>Per-Request Performance<br><span>Monitoring for K8s Applications</span></h1>
         <p>Measure CPU time, memory, network I/O, and duration for every HTTP request hitting your pods. Track correlation IDs across services. Zero instrumentation required.</p>
         <div class="hero-actions">
             <a href="https://github.com/DevOpsArts/perfcatch" class="btn btn-primary">
@@ -873,33 +873,6 @@
                 View on GitHub
             </a>
             <a href="#quickstart" class="btn btn-secondary">Quick Start ↓</a>
-        </div>
-
-        <!-- Terminal Preview -->
-        <div class="terminal-preview">
-            <div class="terminal-header">
-                <div class="terminal-dot red"></div>
-                <div class="terminal-dot yellow"></div>
-                <div class="terminal-dot green"></div>
-            </div>
-            <div class="terminal-body">
-<span class="cmd">$ helm install perfcatch charts/perfcatch -n perfcatch --create-namespace</span>
-<span class="output">NAME: perfcatch
-STATUS: deployed</span>
-
-<span class="cmd">$ curl -s localhost:9091/api/requests?namespace=sample-app | jq '.requests[0]'</span>
-{
-  <span class="highlight">"correlation_id"</span>: <span class="value">"order-12345"</span>,
-  <span class="highlight">"pod_name"</span>: <span class="value">"sample-app-5879fb87f5-zcfbr"</span>,
-  <span class="highlight">"http_method"</span>: <span class="value">"GET"</span>,
-  <span class="highlight">"http_path"</span>: <span class="value">"/compute"</span>,
-  <span class="highlight">"duration_ms"</span>: <span class="value">9.24</span>,
-  <span class="highlight">"cpu_time_ms"</span>: <span class="value">8.90</span>,
-  <span class="highlight">"memory_rss_bytes"</span>: <span class="value">53518336</span>,
-  <span class="highlight">"bytes_received"</span>: <span class="value">161</span>,
-  <span class="highlight">"bytes_sent"</span>: <span class="value">170</span>
-}
-            </div>
         </div>
     </section>
 
