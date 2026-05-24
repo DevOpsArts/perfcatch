@@ -1,0 +1,87 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.victoriametrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoriametrics
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+    app.kubernetes.io/component: victoriametrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victoriametrics
+  template:
+    metadata:
+      labels:
+        app: victoriametrics
+    spec:
+      containers:
+        - name: victoriametrics
+          image: {{ .Values.monitoring.victoriametrics.image }}
+          ports:
+            - containerPort: 8428
+              name: http
+          args:
+            - '-retentionPeriod={{ .Values.monitoring.victoriametrics.retention }}'
+            - '-storageDataPath=/victoria-metrics-data'
+            - '-httpListenAddr=:8428'
+          volumeMounts:
+            - name: storage
+              mountPath: /victoria-metrics-data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: storage
+          {{- if .Values.monitoring.victoriametrics.storage.size }}
+          persistentVolumeClaim:
+            claimName: victoriametrics-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+---
+{{- if .Values.monitoring.victoriametrics.storage.size }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: victoriametrics-data
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.monitoring.victoriametrics.storage.size }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoriametrics
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.monitoring.victoriametrics.nodePort }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}
+  selector:
+    app: victoriametrics
+  ports:
+    - port: 8428
+      targetPort: 8428
+      name: http
+      {{- if .Values.monitoring.victoriametrics.nodePort }}
+      nodePort: {{ .Values.monitoring.victoriametrics.nodePort }}
+      {{- end }}
+{{- end }}

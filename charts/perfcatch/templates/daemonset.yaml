@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "perfcatch.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "perfcatch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "perfcatch.selectorLabels" . | nindent 8 }}
+      {{- if .Values.prometheusAnnotations.enabled }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.config.apiPort | default "9090" | quote }}
+        prometheus.io/path: "/metrics"
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "perfcatch.serviceAccountName" . }}
+      hostPID: true
+      hostNetwork: true
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.config.apiPort | default 9090 }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "perfcatch.fullname" . }}-config
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - SYS_PTRACE
+                - NET_ADMIN
+                - BPF
+                - PERFMON
+          volumeMounts:
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
+              readOnly: true
+            - name: sys-kernel-btf
+              mountPath: /sys/kernel/btf
+              readOnly: true
+            - name: proc
+              mountPath: /proc
+              readOnly: true
+            - name: modules
+              mountPath: /lib/modules
+            - name: src
+              mountPath: /usr/src
+              readOnly: true
+          {{- if or .Values.persistence.enabled (not .Values.monitoring.enabled) }}
+            - name: data
+              mountPath: {{ .Values.persistence.hostPath }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        {{- if or .Values.persistence.enabled (not .Values.monitoring.enabled) }}
+        - name: data
+          hostPath:
+            path: {{ .Values.persistence.hostPath }}
+            type: DirectoryOrCreate
+        {{- end }}
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
+        - name: sys-kernel-btf
+          hostPath:
+            path: /sys/kernel/btf
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: modules
+          hostPath:
+            path: /lib/modules
+        - name: src
+          hostPath:
+            path: /usr/src

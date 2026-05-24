@@ -1,0 +1,37 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "perfcatch.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "perfcatch.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      path: /metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "perfcatch.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "perfcatch.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: metrics
+      port: {{ .Values.config.apiPort | default 9090 }}
+      targetPort: metrics
+      protocol: TCP
+{{- end }}

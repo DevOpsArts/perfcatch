@@ -1,0 +1,13 @@
+apiVersion: v2
+name: perfcatch
+description: eBPF-based per-request resource measurement for Kubernetes pods
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - ebpf
+  - observability
+  - kubernetes
+  - performance
+maintainers:
+  - name: perfcatch

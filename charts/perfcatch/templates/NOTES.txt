@@ -1,0 +1,32 @@
+perfcatch has been deployed!
+
+To check the agent status:
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ include "perfcatch.name" . }}
+
+To view logs:
+  kubectl -n {{ .Release.Namespace }} logs -l app.kubernetes.io/name={{ include "perfcatch.name" . }} -f
+
+To access the metrics API:
+  kubectl -n {{ .Release.Namespace }} port-forward \
+    $(kubectl -n {{ .Release.Namespace }} get pod -l app.kubernetes.io/component=agent -o jsonpath='{.items[0].metadata.name}') \
+    9090:{{ .Values.config.apiPort }}
+
+{{- if .Values.monitoring.enabled }}
+
+Monitoring stack deployed in namespace '{{ .Values.monitoring.namespace }}':
+  Grafana:    kubectl -n {{ .Values.monitoring.namespace }} port-forward svc/grafana 3000:3000
+  Prometheus: kubectl -n {{ .Values.monitoring.namespace }} port-forward svc/prometheus 9090:9090
+
+  Grafana password: {{ .Values.monitoring.grafana.adminPassword }}
+{{- end }}
+
+To add custom correlation headers, set:
+  --set config.correlationHeaders="x-my-header,x-custom-trace"
+
+To copy the database locally for reporting:
+  kubectl -n {{ .Release.Namespace }} cp \
+    $(kubectl -n {{ .Release.Namespace }} get pod -l app.kubernetes.io/component=agent -o jsonpath='{.items[0].metadata.name}'):/var/lib/perfcatch/data.db \
+    ./data.db
+
+Then run:
+  perfcatch --db ./data.db report -n <target-namespace>

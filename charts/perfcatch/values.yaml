@@ -1,0 +1,100 @@
+image:
+  repository: devopsart1/perfcatch
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Target namespace to monitor (empty = all namespaces)
+config:
+  namespace: ""
+  pods: ""
+  logLevel: "INFO"
+  apiPort: "9090"
+  # Ring buffer size (max requests in memory). At 500 req/s, 50000 = ~100s history
+  bufferSize: "50000"
+  # Flush interval in seconds
+  flushInterval: "2"
+  # Extra correlation headers (comma-separated, added to built-in defaults)
+  # Built-in: x-correlation-id, x-request-id, x-trace-id, traceparent, x-amzn-trace-id, request-id, correlation-id
+  correlationHeaders: ""
+  # Prometheus Remote Write URL (optional, push per-request metrics to VictoriaMetrics/Mimir/Thanos)
+  # Example: http://victoriametrics:8428
+  remoteWriteUrl: ""
+
+# Persistence for standalone mode (no Prometheus)
+# Uses hostPath to store SQLite DB on each node
+# Automatically enabled when monitoring.enabled=false (can override)
+persistence:
+  enabled: false
+  # Host path on each node for storing perfcatch data
+  hostPath: /var/lib/perfcatch
+  # SQLite DB file name
+  dbFile: data.db
+
+serviceAccount:
+  create: true
+  name: ""
+
+rbac:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+tolerations:
+  - operator: Exists
+    effect: NoSchedule
+
+nodeSelector: {}
+
+# Prometheus scrape annotations on agent pods (for existing Prometheus)
+prometheusAnnotations:
+  enabled: true
+
+# ServiceMonitor for Prometheus Operator (if customer uses it)
+serviceMonitor:
+  enabled: false
+  interval: 15s
+  labels: {}
+
+# Deploy monitoring stack (Prometheus + Grafana)
+# Set to false if customer already has Prometheus/Grafana
+monitoring:
+  enabled: true
+  namespace: monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    scrapeInterval: 15s
+    nodePort: 30090
+    # Data retention
+    retention: 15d
+    # Persistent storage for scraped metrics (survives pod restarts)
+    storage:
+      size: 5Gi
+
+  grafana:
+    image: grafana/grafana:latest
+    adminPassword: perfcatch
+    anonymousAuth: true
+    nodePort: 30030
+
+  # VictoriaMetrics single-node (optional, for high-cardinality per-request storage)
+  # When enabled, agent pushes per-request metrics via remote write
+  victoriametrics:
+    enabled: false
+    image: victoriametrics/victoria-metrics:latest
+    # Retention period
+    retention: 30d
+    # Storage size
+    storage:
+      size: 10Gi
+    # NodePort (set to null for ClusterIP)
+    nodePort: null

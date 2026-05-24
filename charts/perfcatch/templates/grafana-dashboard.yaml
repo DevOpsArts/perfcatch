@@ -1,0 +1,327 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-perfcatch
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+data:
+  perfcatch.json: |
+    {
+      "annotations": {"list": []},
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "title": "Request Count by Service",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "targets": [
+            {
+              "expr": "perfcatch_requests_total{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\"}",
+              "legendFormat": "{{`{{namespace}}`}}/{{`{{pod}}`}}/{{`{{process}}`}}:{{`{{port}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "short"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Request Duration (ms)",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "targets": [
+            {
+              "expr": "perfcatch_req_duration_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\",correlation_id!=\"none\"}",
+              "legendFormat": "{{`{{correlation_id}}`}} {{`{{method}}`}} {{`{{path}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "ms"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "CPU Time (ms)",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "targets": [
+            {
+              "expr": "perfcatch_req_cpu_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\",correlation_id!=\"none\"}",
+              "legendFormat": "{{`{{correlation_id}}`}} {{`{{method}}`}} {{`{{path}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "ms"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Memory RSS (bytes)",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "targets": [
+            {
+              "expr": "perfcatch_req_memory_bytes{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\",correlation_id!=\"none\"}",
+              "legendFormat": "{{`{{correlation_id}}`}} {{`{{method}}`}} {{`{{path}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "bytes"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Network RX (bytes)",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+          "targets": [
+            {
+              "expr": "perfcatch_req_bytes_rx{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\",correlation_id!=\"none\"}",
+              "legendFormat": "{{`{{correlation_id}}`}} {{`{{method}}`}} {{`{{path}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "bytes"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Network TX (bytes)",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+          "targets": [
+            {
+              "expr": "perfcatch_req_bytes_tx{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\",correlation_id!=\"none\"}",
+              "legendFormat": "{{`{{correlation_id}}`}} {{`{{method}}`}} {{`{{path}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "bytes"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Max Request Duration (ms)",
+          "type": "stat",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+          "targets": [
+            {
+              "expr": "perfcatch_request_duration_ms_max{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\"}",
+              "legendFormat": "{{`{{namespace}}`}}/{{`{{pod}}`}}/{{`{{process}}`}}:{{`{{port}}`}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {"unit": "ms"},
+            "overrides": []
+          }
+        },
+        {
+          "title": "Individual Requests (Per-Request Detail)",
+          "type": "table",
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 32},
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "perfcatch_req_duration_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_cpu_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "B",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_memory_bytes{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "C",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_bytes_rx{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "D",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_bytes_tx{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "E",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_start_time{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "F",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "perfcatch_req_end_time{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"}",
+              "legendFormat": "",
+              "refId": "G",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "clamp_max(perfcatch_req_cpu_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"} / perfcatch_req_duration_ms{namespace=~\"$namespace\",process=~\"$application\",pod=~\"$pod\",correlation_id=~\"$correlation_id\"} * 100, 100)",
+              "legendFormat": "",
+              "refId": "H",
+              "instant": true,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": ["request_id", "correlation_id", "method", "path", "namespace", "pod", "process", "port", "Value #A", "Value #B", "Value #C", "Value #D", "Value #E", "Value #F", "Value #G", "Value #H"]
+                }
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "request_id": "Request ID",
+                  "correlation_id": "Correlation ID",
+                  "method": "Method",
+                  "path": "Path",
+                  "namespace": "Namespace",
+                  "pod": "Pod",
+                  "process": "Process",
+                  "port": "Port",
+                  "Value #F": "Start Time",
+                  "Value #G": "End Time",
+                  "Value #A": "Duration (ms)",
+                  "Value #B": "CPU Time (ms)",
+                  "Value #H": "CPU %",
+                  "Value #C": "Memory (bytes)",
+                  "Value #D": "RX Bytes",
+                  "Value #E": "TX Bytes"
+                },
+                "indexByName": {
+                  "request_id": 0,
+                  "correlation_id": 1,
+                  "Value #F": 2,
+                  "Value #G": 3,
+                  "method": 4,
+                  "path": 5,
+                  "namespace": 6,
+                  "pod": 7,
+                  "process": 8,
+                  "port": 9,
+                  "Value #A": 10,
+                  "Value #B": 11,
+                  "Value #H": 12,
+                  "Value #C": 13,
+                  "Value #D": 14,
+                  "Value #E": 15
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Start Time"}, "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm:ss.SSS"}]},
+              {"matcher": {"id": "byName", "options": "End Time"}, "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm:ss.SSS"}]},
+              {"matcher": {"id": "byName", "options": "Duration (ms)"}, "properties": [{"id": "unit", "value": "ms"}, {"id": "custom.cellOptions", "value": {"type": "color-background", "mode": "gradient"}}, {"id": "color", "value": {"mode": "continuous-YlRd"}}]},
+              {"matcher": {"id": "byName", "options": "CPU Time (ms)"}, "properties": [{"id": "unit", "value": "ms"}]},
+              {"matcher": {"id": "byName", "options": "CPU %"}, "properties": [{"id": "unit", "value": "percent"}, {"id": "decimals", "value": 1}, {"id": "custom.cellOptions", "value": {"type": "color-background", "mode": "gradient"}}, {"id": "color", "value": {"mode": "continuous-YlRd"}}]},
+              {"matcher": {"id": "byName", "options": "Memory (bytes)"}, "properties": [{"id": "unit", "value": "bytes"}]},
+              {"matcher": {"id": "byName", "options": "RX Bytes"}, "properties": [{"id": "unit", "value": "bytes"}]},
+              {"matcher": {"id": "byName", "options": "TX Bytes"}, "properties": [{"id": "unit", "value": "bytes"}]}
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Start Time", "desc": true}]
+          }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["perfcatch", "ebpf"],
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(perfcatch_requests_total, namespace)",
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "current": {"selected": true, "text": ["All"], "value": ["$__all"]}
+          },
+          {
+            "name": "application",
+            "label": "Application",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(perfcatch_requests_total{namespace=~\"$namespace\"}, process)",
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "current": {"selected": true, "text": ["All"], "value": ["$__all"]}
+          },
+          {
+            "name": "pod",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(perfcatch_requests_total{namespace=~\"$namespace\",process=~\"$application\"}, pod)",
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "current": {"selected": true, "text": ["All"], "value": ["$__all"]}
+          },
+          {
+            "name": "correlation_id",
+            "label": "Correlation ID",
+            "type": "textbox",
+            "description": "Filter requests by correlation ID (supports regex)",
+            "current": {"selected": false, "text": ".*", "value": ".*"},
+            "options": []
+          }
+        ]
+      },
+      "time": {"from": "now-15m", "to": "now"},
+      "title": "PerfCatch - eBPF Request Metrics",
+      "uid": "perfcatch-main",
+      "version": 2
+    }
+{{- end }}

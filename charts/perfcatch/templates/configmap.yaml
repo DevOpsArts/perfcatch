@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "perfcatch.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "perfcatch.labels" . | nindent 4 }}
+data:
+  PERFCATCH_NAMESPACE: {{ .Values.config.namespace | quote }}
+  PERFCATCH_PODS: {{ .Values.config.pods | quote }}
+  PERFCATCH_LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  PERFCATCH_API_PORT: {{ .Values.config.apiPort | quote }}
+  PERFCATCH_BUFFER_SIZE: {{ .Values.config.bufferSize | quote }}
+  PERFCATCH_FLUSH_INTERVAL: {{ .Values.config.flushInterval | quote }}
+  {{- if .Values.config.correlationHeaders }}
+  PERFCATCH_CORRELATION_HEADERS: {{ .Values.config.correlationHeaders | quote }}
+  {{- end }}
+  {{- if .Values.config.remoteWriteUrl }}
+  PERFCATCH_REMOTE_WRITE_URL: {{ .Values.config.remoteWriteUrl | quote }}
+  {{- else if and .Values.monitoring.enabled .Values.monitoring.victoriametrics.enabled }}
+  PERFCATCH_REMOTE_WRITE_URL: "http://victoriametrics.{{ .Values.monitoring.namespace }}:8428"
+  {{- end }}
+  {{- if or .Values.persistence.enabled (not .Values.monitoring.enabled) }}
+  PERFCATCH_DB_PATH: "{{ .Values.persistence.hostPath }}/{{ .Values.persistence.dbFile }}"
+  {{- end }}
