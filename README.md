@@ -563,6 +563,12 @@ The entrypoint creates a kernel header symlink. If `/lib/modules` is read-only (
 
 ---
 
+## Contributors
+
+- [Devopsart](https://github.com/DevOpsArts)
+
+---
+
 ## License
 
 MIT
