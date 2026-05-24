@@ -1,6 +1,6 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim-bookworm AS builder
 
-# Install BCC and kernel headers
+# Install BCC and kernel headers (build-time only deps)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bpfcc-tools \
     libbpfcc \
@@ -66,23 +66,68 @@ RUN set -e; \
     fi; \
     echo "Kernel headers merged at $MERGED (arch=$ARCH)"
 
-# Make system-installed bcc visible to pip's Python
-RUN ln -sf /usr/lib/python3/dist-packages/bcc /usr/local/lib/python3.11/site-packages/bcc
-
 WORKDIR /app
 
 # Copy and install the package
 COPY pyproject.toml .
 COPY src/ src/
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir . && \
+    pip cache purge 2>/dev/null || true
 
-# Create data directory
-RUN mkdir -p /var/lib/perfcatch
+# --- Final stage ---
+FROM python:3.11-slim-bookworm
+
+# SECURITY: Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bpfcc-tools \
+    libbpfcc \
+    python3-bpfcc \
+    kmod \
+    bpftool \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# SECURITY: Create non-root user
+# Note: eBPF requires CAP_BPF + CAP_SYS_ADMIN at runtime (granted via K8s securityContext)
+RUN groupadd -r perfcatch && useradd -r -g perfcatch -d /app -s /sbin/nologin perfcatch
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /opt/kernel-headers /opt/kernel-headers
+
+# Make system-installed bcc visible to pip's Python
+RUN ln -sf /usr/lib/python3/dist-packages/bcc /usr/local/lib/python3.11/site-packages/bcc
+
+WORKDIR /app
+
+# SECURITY: Create data directory with restricted permissions
+RUN mkdir -p /var/lib/perfcatch && \
+    chown perfcatch:perfcatch /var/lib/perfcatch && \
+    chmod 750 /var/lib/perfcatch
 
 # Copy entrypoint script
 COPY src/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+
+# SECURITY: Remove setuid/setgid binaries to prevent privilege escalation
+RUN find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
+
+# SECURITY: Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:9090/health || exit 1
+
+# SECURITY: Run as non-root user
+# Capabilities are granted via K8s securityContext (CAP_BPF, CAP_SYS_ADMIN, CAP_NET_ADMIN)
+USER perfcatch
+
+# SECURITY: OCI metadata labels
+LABEL maintainer="DevOpsArts" \
+      org.opencontainers.image.source="https://github.com/DevOpsArts/perfcatch" \
+      org.opencontainers.image.description="eBPF per-request performance monitoring for Kubernetes" \
+      org.opencontainers.image.licenses="MIT"
 
 # Run the agent daemon
 CMD ["/entrypoint.sh"]
