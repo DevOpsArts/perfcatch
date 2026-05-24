@@ -1,6 +1,6 @@
 # PerfCatch
 
-**eBPF-based per-request performance monitoring for Kubernetes — zero code changes required.**
+**eBPF-based per-request performance monitoring for Kubernetes Application — zero code changes required.**
 
 PerfCatch measures CPU time, memory, network I/O, and duration for **every individual HTTP request** hitting your pods. It captures correlation IDs from HTTP headers to trace requests across services and exposes real-time metrics via Prometheus + Grafana.
 
